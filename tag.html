@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="description" content="Printable luggage tag for a digital Bag ID.">
+    <meta name="theme-color" content="#111111">
+    <title>Bag ID | Printable Tag</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body data-page="tag">
+    <header class="topbar no-print" aria-label="Tag controls">
+      <a class="brand" href="index.html" aria-label="Bag ID">
+        <span class="suitcase-mark suitcase-mark-small" aria-hidden="true"></span>
+        <span>Bag ID</span>
+      </a>
+      <button class="primary-button compact-button" type="button" id="print-button">STAMPA PORTANOME</button>
+    </header>
+
+    <main class="tag-page">
+      <section class="tag-stage" aria-label="Portanome stampabile">
+        <article class="print-tag print-tag-front" aria-label="Fronte portanome">
+          <div class="tag-copy">
+            <span class="suitcase-mark suitcase-mark-tag" aria-hidden="true"></span>
+            <p class="tag-kicker">IF FOUND</p>
+            <h1>SCAN TO CONTACT OWNER</h1>
+            <p class="tag-bag-label">PRIVATE OWNER ID</p>
+          </div>
+          <div class="qr-shell" aria-label="QR code">
+            <div id="qr-code"></div>
+          </div>
+        </article>
+
+        <article class="print-tag print-tag-back" aria-label="Retro portanome">
+          <span class="suitcase-mark suitcase-mark-tag" aria-hidden="true"></span>
+          <p>THIS BAG HAS A DIGITAL OWNER ID</p>
+          <h2>SCAN THE QR CODE IF FOUND</h2>
+          <span class="tag-line"></span>
+          <p class="tag-small">NO PERSONAL DETAILS SHOWN</p>
+        </article>
+      </section>
+
+      <section class="tag-controls no-print" aria-label="Informazioni QR">
+        <div>
+          <p class="eyebrow">QR CODE</p>
+          <p class="qr-target" id="qr-target">Generato dal valore pubblico configurato in assets/js/config.js.</p>
+        </div>
+        <p class="tag-warning" id="tag-warning"></p>
+      </section>
+    </main>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/qrcode.min.js"></script>
+    <script src="assets/js/tag.js"></script>
+  </body>
+</html>
