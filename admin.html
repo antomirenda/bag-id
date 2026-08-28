@@ -7,6 +7,8 @@
     <meta name="description" content="Pannello privato per vedere le segnalazioni della valigia.">
     <meta name="theme-color" content="#111111">
     <title>Bag ID | Segnalazioni</title>
+    <link rel="manifest" href="admin.webmanifest">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
   </head>
   <body data-page="admin">
@@ -50,7 +52,11 @@
             <strong>Risolte</strong>
           </div>
           <button class="secondary-button compact-button" id="refresh-button" type="button">AGGIORNA</button>
+          <div class="admin-actions">
+            <button class="secondary-button compact-button" id="enable-notifications-button" type="button">ATTIVA NOTIFICHE</button>
+          </div>
         </div>
+        <p class="muted-line live-refresh" id="live-refresh-status">Aggiornamento automatico ogni 30 secondi.</p>
 
         <div class="report-list" id="report-list"></div>
       </section>
