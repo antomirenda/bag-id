@@ -8,6 +8,7 @@ Sito statico per GitHub Pages collegato a un piccolo backend con database. Chi t
 - Portanome stampabile: `https://antomirenda.github.io/bag-id/tag.html`
 - Pannello segnalazioni: `https://antomirenda.github.io/bag-id/admin.html`
 - Backend segnalazioni: `https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/reports`
+- Backend notifiche: `https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/push`
 
 ## Privacy
 
@@ -16,6 +17,18 @@ Il repository GitHub Pages è pubblico. Per questo motivo non contiene email, te
 Il Bag ID non viene mostrato come testo nella pagina pubblica o sulla targhetta. Rimane nel file di configurazione, nell'URL del QR e nei dati inviati dal form, così la segnalazione può essere associata alla valigia.
 
 Il codice privato del pannello admin non è salvato in questo repository. È configurato come segreto del backend.
+
+Il modulo contiene un controllo anti-bot visibile e un campo honeypot nascosto. Il backend verifica il controllo anti-bot prima di accettare una segnalazione.
+
+I dati personali delle segnalazioni vengono eliminati automaticamente dopo 7 giorni: nome, contatto, messaggio e coordinate vengono sovrascritti in modo definitivo dal backend.
+
+## Licenza e responsabilità
+
+Questo progetto è pubblico solo per permettere il funzionamento di GitHub Pages. Non è open source.
+
+Tutti i diritti sono riservati. Nessuno può usare, copiare, modificare, distribuire, vendere, pubblicare, ospitare o riutilizzare il codice, il design, i testi o gli asset senza autorizzazione scritta del proprietario.
+
+Il progetto è fornito senza garanzie e il proprietario non si assume responsabilità per usi impropri, copie non autorizzate, interruzioni, errori, perdite di dati, incidenti di sicurezza o conseguenze derivanti dall'uso o dalla consultazione del codice e del sito.
 
 ## Struttura
 
@@ -60,6 +73,8 @@ const CONFIG = {
   bagId: "AM-7K42",
   siteUrl: "https://antomirenda.github.io/bag-id/bag/?id=AM-7K42",
   formEndpoint: "https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/reports",
+  pushEndpoint: "https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/push",
+  pushPublicKey: "PUBLIC_WEB_PUSH_KEY",
   defaultLanguage: "it"
 };
 ```
@@ -78,6 +93,10 @@ Da `admin.html` si possono vedere:
 - stato della segnalazione: nuova, vista o risolta.
 
 Il pannello richiede il codice privato impostato nel backend. Non pubblicare questo codice nel repository.
+
+Il pannello può essere installato come app sul telefono. Dopo averlo aperto con il codice privato, il pulsante `ATTIVA NOTIFICHE` registra solo quel dispositivo. Le notifiche sono generiche e non mostrano il messaggio o il contatto sulla schermata bloccata.
+
+Il pannello si aggiorna automaticamente ogni 30 secondi mentre è aperto.
 
 ## Stampa del portanome
 
