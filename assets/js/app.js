@@ -11,7 +11,9 @@
     language: document.querySelector("#language-field"),
     latitude: document.querySelector("#latitude-field"),
     longitude: document.querySelector("#longitude-field"),
-    mapsLink: document.querySelector("#maps-link-field")
+    mapsLink: document.querySelector("#maps-link-field"),
+    botA: document.querySelector("#bot-a-field"),
+    botB: document.querySelector("#bot-b-field")
   };
   const locationButton = document.querySelector("#location-button");
   const locationStatus = document.querySelector("#location-status");
@@ -20,6 +22,13 @@
   const formStatus = document.querySelector("#form-status");
   const submitButton = document.querySelector("#submit-button");
   const successScreen = document.querySelector("#success-screen");
+  const foundLocationInput = document.querySelector("#found-location");
+  const addressSuggestions = document.querySelector("#address-suggestions");
+  const addressSearchStatus = document.querySelector("#address-search-status");
+  const foundMap = document.querySelector("#found-map");
+  const foundMapFrame = document.querySelector("#found-map-frame");
+  const botQuestion = document.querySelector("#bot-question");
+  const botAnswer = document.querySelector("#bot-answer");
 
   const copy = {
     it: {
@@ -40,7 +49,12 @@
       placeCity: "Città o strada",
       placeOther: "Altro",
       locationLabel: "Dove hai trovato la valigia?",
-      locationPlaceholder: "Luogo o riferimento preciso...",
+      locationPlaceholder: "Cerca via, aeroporto, stazione, hotel...",
+      addressSearchHint: "Inizia a scrivere e seleziona il luogo giusto se compare.",
+      addressSearching: "Ricerca del luogo...",
+      addressEmpty: "Nessun suggerimento trovato. Puoi scrivere il luogo a mano.",
+      addressError: "Ricerca indirizzo non disponibile. Puoi scrivere il luogo a mano.",
+      addressSelected: "Luogo selezionato e posizione aggiunta.",
       messageLabel: "Messaggio",
       messagePlaceholder: "Scrivi un messaggio al proprietario...",
       finderNameLabel: "Nome di chi ha trovato la valigia",
@@ -58,6 +72,10 @@
       shareLocationButton: "CONDIVIDI POSIZIONE DEL RITROVAMENTO",
       openMaps: "Apri posizione su Google Maps",
       privacyConsent: "Autorizzo l'invio delle informazioni inserite esclusivamente allo scopo di contattare il proprietario della valigia.",
+      antiBotLabel: "Controllo anti-bot",
+      antiBotPlaceholder: "Risultato",
+      antiBotHint: "Serve solo a bloccare invii automatici.",
+      antiBotError: "Risultato anti-bot non corretto.",
       submitButton: "INVIA AL PROPRIETARIO",
       successTitle: "MESSAGGIO INVIATO",
       successText: "Grazie per il tuo aiuto. La tua segnalazione è stata inviata al proprietario della valigia.",
@@ -92,7 +110,12 @@
       placeCity: "City or street",
       placeOther: "Other",
       locationLabel: "Where did you find the bag?",
-      locationPlaceholder: "Place or precise reference...",
+      locationPlaceholder: "Search street, airport, station, hotel...",
+      addressSearchHint: "Start typing and select the right place if it appears.",
+      addressSearching: "Searching place...",
+      addressEmpty: "No suggestion found. You can type the place manually.",
+      addressError: "Address search unavailable. You can type the place manually.",
+      addressSelected: "Place selected and location added.",
       messageLabel: "Message",
       messagePlaceholder: "Write a message to the owner...",
       finderNameLabel: "Name of the person who found the bag",
@@ -110,6 +133,10 @@
       shareLocationButton: "SHARE FOUND LOCATION",
       openMaps: "Open location in Google Maps",
       privacyConsent: "I authorize the information entered to be sent only for the purpose of contacting the bag owner.",
+      antiBotLabel: "Anti-bot check",
+      antiBotPlaceholder: "Result",
+      antiBotHint: "This only helps block automated submissions.",
+      antiBotError: "The anti-bot answer is not correct.",
       submitButton: "SEND TO OWNER",
       successTitle: "MESSAGE SENT",
       successText: "Thank you for your help. Your message has been sent to the bag owner.",
@@ -129,6 +156,10 @@
   };
 
   let currentLanguage = copy[config.defaultLanguage] ? config.defaultLanguage : "it";
+  let addressSearchTimer = 0;
+  let addressSearchController = null;
+  let addressResults = [];
+  let suppressAddressInput = false;
 
   function isPlaceholder(value) {
     return !value || /^INSERIRE_/i.test(String(value).trim());
@@ -187,6 +218,228 @@
     }
   }
 
+  function setBotChallenge() {
+    const first = Math.floor(Math.random() * 7) + 2;
+    const second = Math.floor(Math.random() * 7) + 2;
+
+    if (fields.botA) {
+      fields.botA.value = String(first);
+    }
+
+    if (fields.botB) {
+      fields.botB.value = String(second);
+    }
+
+    if (botQuestion) {
+      botQuestion.textContent = `${first} + ${second}`;
+    }
+
+    if (botAnswer) {
+      botAnswer.value = "";
+    }
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function googleMapsLink(latitude, longitude) {
+    return `https://www.google.com/maps?q=${latitude},${longitude}`;
+  }
+
+  function googleMapEmbed(latitude, longitude) {
+    return `https://www.google.com/maps?q=${latitude},${longitude}&z=17&output=embed`;
+  }
+
+  function clearFoundCoordinates() {
+    if (fields.latitude) {
+      fields.latitude.value = "";
+    }
+
+    if (fields.longitude) {
+      fields.longitude.value = "";
+    }
+
+    if (fields.mapsLink) {
+      fields.mapsLink.value = "";
+    }
+
+    if (mapsPreview) {
+      mapsPreview.classList.add("is-hidden");
+      mapsPreview.removeAttribute("href");
+    }
+
+    if (coordinatesPreview) {
+      coordinatesPreview.textContent = "";
+      coordinatesPreview.classList.add("is-hidden");
+    }
+
+    if (foundMap && foundMapFrame) {
+      foundMap.classList.add("is-hidden");
+      foundMapFrame.removeAttribute("src");
+    }
+  }
+
+  function setFoundCoordinates(latitude, longitude) {
+    const mapsLink = googleMapsLink(latitude, longitude);
+
+    if (fields.latitude) {
+      fields.latitude.value = latitude;
+    }
+
+    if (fields.longitude) {
+      fields.longitude.value = longitude;
+    }
+
+    if (fields.mapsLink) {
+      fields.mapsLink.value = mapsLink;
+    }
+
+    if (coordinatesPreview) {
+      coordinatesPreview.textContent = `${copy[currentLanguage].coordinatesLabel}: ${latitude}, ${longitude}`;
+      coordinatesPreview.classList.remove("is-hidden");
+    }
+
+    if (mapsPreview) {
+      mapsPreview.href = mapsLink;
+      mapsPreview.classList.remove("is-hidden");
+    }
+
+    if (foundMap && foundMapFrame) {
+      foundMapFrame.src = googleMapEmbed(latitude, longitude);
+      foundMap.classList.remove("is-hidden");
+    }
+  }
+
+  function clearAddressSuggestions() {
+    addressResults = [];
+
+    if (addressSuggestions) {
+      addressSuggestions.innerHTML = "";
+      addressSuggestions.classList.add("is-hidden");
+    }
+
+    if (foundLocationInput) {
+      foundLocationInput.setAttribute("aria-expanded", "false");
+    }
+  }
+
+  function renderAddressSuggestions(results) {
+    addressResults = results;
+
+    if (!addressSuggestions || !foundLocationInput) {
+      return;
+    }
+
+    if (!results.length) {
+      clearAddressSuggestions();
+      if (addressSearchStatus) {
+        addressSearchStatus.textContent = copy[currentLanguage].addressEmpty;
+      }
+      return;
+    }
+
+    addressSuggestions.innerHTML = results.map(function (item, index) {
+      return `
+        <button type="button" role="option" data-address-index="${index}">
+          <strong>${escapeHtml(item.name || item.display_name)}</strong>
+          <span>${escapeHtml(item.display_name)}</span>
+        </button>
+      `;
+    }).join("");
+    addressSuggestions.classList.remove("is-hidden");
+    foundLocationInput.setAttribute("aria-expanded", "true");
+
+    if (addressSearchStatus) {
+      addressSearchStatus.textContent = copy[currentLanguage].addressSearchHint;
+    }
+  }
+
+  async function searchAddress(query) {
+    if (!query || query.length < 3) {
+      clearAddressSuggestions();
+      if (addressSearchStatus) {
+        addressSearchStatus.textContent = copy[currentLanguage].addressSearchHint;
+      }
+      return;
+    }
+
+    if (addressSearchController) {
+      addressSearchController.abort();
+    }
+
+    addressSearchController = new AbortController();
+
+    if (addressSearchStatus) {
+      addressSearchStatus.textContent = copy[currentLanguage].addressSearching;
+    }
+
+    const searchUrl = new URL("https://nominatim.openstreetmap.org/search");
+    searchUrl.searchParams.set("format", "jsonv2");
+    searchUrl.searchParams.set("addressdetails", "1");
+    searchUrl.searchParams.set("limit", "5");
+    searchUrl.searchParams.set("accept-language", currentLanguage);
+    searchUrl.searchParams.set("q", query);
+
+    try {
+      const response = await fetch(searchUrl.toString(), {
+        headers: {
+          Accept: "application/json"
+        },
+        signal: addressSearchController.signal
+      });
+
+      if (!response.ok) {
+        throw new Error("Address search failed");
+      }
+
+      const data = await response.json();
+      renderAddressSuggestions(Array.isArray(data) ? data : []);
+    } catch (error) {
+      if (error && error.name === "AbortError") {
+        return;
+      }
+
+      clearAddressSuggestions();
+      if (addressSearchStatus) {
+        addressSearchStatus.textContent = copy[currentLanguage].addressError;
+      }
+    }
+  }
+
+  function queueAddressSearch() {
+    window.clearTimeout(addressSearchTimer);
+    addressSearchTimer = window.setTimeout(function () {
+      searchAddress(foundLocationInput ? foundLocationInput.value.trim() : "");
+    }, 650);
+  }
+
+  function selectAddress(index) {
+    const item = addressResults[index];
+    if (!item || !foundLocationInput) {
+      return;
+    }
+
+    const latitude = Number(item.lat);
+    const longitude = Number(item.lon);
+
+    suppressAddressInput = true;
+    foundLocationInput.value = item.display_name || item.name || foundLocationInput.value;
+    suppressAddressInput = false;
+    clearAddressSuggestions();
+
+    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+      setFoundCoordinates(latitude.toFixed(6), longitude.toFixed(6));
+      locationStatus.textContent = copy[currentLanguage].addressSelected;
+      locationStatus.className = "location-status is-success";
+    }
+  }
+
   function validateForm() {
     clearErrors();
     let isValid = true;
@@ -196,7 +449,8 @@
       document.querySelector("#message"),
       document.querySelector("#finder-name"),
       document.querySelector("#contact-method"),
-      document.querySelector("#finder-contact")
+      document.querySelector("#finder-contact"),
+      botAnswer
     ];
 
     requiredFields.forEach(function (field) {
@@ -211,6 +465,16 @@
     if (privacyConsent && !privacyConsent.checked) {
       setFieldError("privacy-consent", copy[currentLanguage].consentError);
       isValid = false;
+    }
+
+    if (botAnswer && fields.botA && fields.botB) {
+      const expected = Number(fields.botA.value) + Number(fields.botB.value);
+      const supplied = Number(botAnswer.value.trim());
+
+      if (!Number.isFinite(supplied) || supplied !== expected) {
+        setFieldError("bot-answer", copy[currentLanguage].antiBotError);
+        isValid = false;
+      }
     }
 
     return isValid;
@@ -231,35 +495,17 @@
       function (position) {
         const latitude = position.coords.latitude.toFixed(6);
         const longitude = position.coords.longitude.toFixed(6);
-        const mapsLink = `https://www.google.com/maps?q=${latitude},${longitude}`;
 
-        fields.latitude.value = latitude;
-        fields.longitude.value = longitude;
-        fields.mapsLink.value = mapsLink;
+        setFoundCoordinates(latitude, longitude);
         locationStatus.textContent = copy[currentLanguage].locationSuccess;
         locationStatus.className = "location-status is-success";
-        if (coordinatesPreview) {
-          coordinatesPreview.textContent = `${copy[currentLanguage].coordinatesLabel}: ${latitude}, ${longitude}`;
-          coordinatesPreview.classList.remove("is-hidden");
-        }
-        if (mapsPreview) {
-          mapsPreview.href = mapsLink;
-          mapsPreview.classList.remove("is-hidden");
-        }
         locationButton.disabled = false;
       },
       function (error) {
         const denied = error && error.code === error.PERMISSION_DENIED;
         locationStatus.textContent = denied ? copy[currentLanguage].locationDenied : copy[currentLanguage].locationUnavailable;
         locationStatus.className = "location-status is-error";
-        if (mapsPreview) {
-          mapsPreview.classList.add("is-hidden");
-          mapsPreview.removeAttribute("href");
-        }
-        if (coordinatesPreview) {
-          coordinatesPreview.textContent = "";
-          coordinatesPreview.classList.add("is-hidden");
-        }
+        clearFoundCoordinates();
         locationButton.disabled = false;
       },
       {
@@ -306,20 +552,14 @@
       fields.bagId.value = bagId;
       fields.pageUrl.value = isPlaceholder(config.siteUrl) ? window.location.href : config.siteUrl;
       fields.language.value = currentLanguage;
-      fields.latitude.value = "";
-      fields.longitude.value = "";
-      fields.mapsLink.value = "";
+      clearFoundCoordinates();
+      clearAddressSuggestions();
+      setBotChallenge();
+      formStatus.textContent = "";
+      formStatus.className = "form-status";
       if (locationStatus) {
         locationStatus.textContent = "";
         locationStatus.className = "location-status";
-      }
-      if (mapsPreview) {
-        mapsPreview.classList.add("is-hidden");
-        mapsPreview.removeAttribute("href");
-      }
-      if (coordinatesPreview) {
-        coordinatesPreview.textContent = "";
-        coordinatesPreview.classList.add("is-hidden");
       }
       successScreen.classList.remove("is-hidden");
       successScreen.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -355,10 +595,45 @@
     locationButton.addEventListener("click", requestLocation);
   }
 
+  if (foundLocationInput) {
+    foundLocationInput.addEventListener("input", function () {
+      if (suppressAddressInput) {
+        return;
+      }
+
+      clearFoundCoordinates();
+      queueAddressSearch();
+    });
+  }
+
+  if (addressSuggestions) {
+    addressSuggestions.addEventListener("click", function (event) {
+      const button = event.target && event.target.closest("[data-address-index]");
+      if (!button) {
+        return;
+      }
+
+      selectAddress(Number(button.getAttribute("data-address-index")));
+    });
+  }
+
+  document.addEventListener("click", function (event) {
+    if (!addressSuggestions || !foundLocationInput) {
+      return;
+    }
+
+    if (event.target === foundLocationInput || addressSuggestions.contains(event.target)) {
+      return;
+    }
+
+    clearAddressSuggestions();
+  });
+
   if (form) {
     form.addEventListener("submit", submitForm);
   }
 
   setText("[data-bag-id]", bagId);
   setLanguage(currentLanguage);
+  setBotChallenge();
 }());
