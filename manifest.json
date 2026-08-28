@@ -1,0 +1,9 @@
+{
+  "name": "Digital Bag ID",
+  "short_name": "Bag ID",
+  "description": "Privacy-first contact page for a registered bag.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f4f1",
+  "theme_color": "#111111"
+}
