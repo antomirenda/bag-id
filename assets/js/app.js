@@ -64,7 +64,7 @@
       footerText: "Questa pagina scoraggia l'indicizzazione, ma chi possiede l'URL può comunque visitarla.",
       requiredError: "Campo obbligatorio.",
       consentError: "Per inviare il messaggio serve questa autorizzazione.",
-      endpointMissing: "Configura prima l'endpoint Formspree in assets/js/config.js.",
+      endpointMissing: "Il servizio di segnalazione non è ancora collegato.",
       sending: "Invio in corso...",
       sendError: "Non è stato possibile inviare il messaggio. Riprova tra poco.",
       locationUnsupported: "La geolocalizzazione non è supportata da questo dispositivo.",
@@ -116,7 +116,7 @@
       footerText: "This page discourages indexing, but anyone with the URL can still visit it.",
       requiredError: "This field is required.",
       consentError: "This authorization is required before sending.",
-      endpointMissing: "Configure the Formspree endpoint in assets/js/config.js first.",
+      endpointMissing: "The reporting service is not connected yet.",
       sending: "Sending...",
       sendError: "The message could not be sent. Please try again shortly.",
       locationUnsupported: "Geolocation is not supported on this device.",
@@ -288,12 +288,14 @@
     formStatus.className = "form-status";
 
     try {
+      const payload = new URLSearchParams();
+      new FormData(form).forEach(function (value, key) {
+        payload.append(key, String(value));
+      });
+
       const response = await fetch(config.formEndpoint, {
         method: "POST",
-        body: new FormData(form),
-        headers: {
-          Accept: "application/json"
-        }
+        body: payload
       });
 
       if (!response.ok) {
