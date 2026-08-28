@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="description" content="Pagina privata di contatto per una valigia registrata.">
+    <meta name="theme-color" content="#111111">
+    <title>Bag ID | Contatta il proprietario</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body data-page="home">
+    <header class="topbar" aria-label="Navigazione">
+      <a class="brand" href="#home" aria-label="Bag ID">
+        <span class="suitcase-mark suitcase-mark-small" aria-hidden="true"></span>
+        <span>Bag ID</span>
+      </a>
+      <nav class="topbar-actions" aria-label="Azioni rapide">
+        <div class="language-switcher" role="group" aria-label="Seleziona lingua">
+          <button class="lang-button is-active" type="button" data-lang="it" aria-pressed="true">IT</button>
+          <button class="lang-button" type="button" data-lang="en" aria-pressed="false">EN</button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="home">
+      <section class="hero-section" aria-labelledby="hero-title">
+        <div class="hero-panel">
+          <div class="bag-status">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span data-i18n="registered">Questa valigia è registrata al suo proprietario.</span>
+          </div>
+
+          <div class="hero-icon" aria-hidden="true">
+            <span class="suitcase-mark suitcase-mark-large"></span>
+          </div>
+
+          <p class="eyebrow" data-i18n="serviceLabel">DIGITAL BAG RECOVERY</p>
+          <h1 id="hero-title" data-i18n="heroTitle">HAI TROVATO QUESTA VALIGIA?</h1>
+          <p class="hero-copy" data-i18n="heroCopy">
+            Grazie per averla trovata. Puoi inviare un messaggio direttamente al proprietario senza visualizzare i suoi dati personali.
+          </p>
+
+          <a class="primary-button" href="#contact-section" data-i18n="contactOwner">CONTATTA IL PROPRIETARIO</a>
+        </div>
+      </section>
+
+      <section class="form-section" id="contact-section" aria-labelledby="form-title">
+        <div class="form-card">
+          <div class="section-heading">
+            <p class="eyebrow" data-i18n="secureFormLabel">MESSAGGIO PROTETTO</p>
+            <h2 id="form-title" data-i18n="formTitle">SEGNALA IL RITROVAMENTO</h2>
+            <p data-i18n="formIntro">Compila il modulo con le informazioni utili per organizzare il recupero della valigia.</p>
+          </div>
+
+          <form id="contact-form" novalidate>
+            <input type="hidden" name="bag_id" id="bag-id-field">
+            <input type="hidden" name="page_url" id="page-url-field">
+            <input type="hidden" name="language" id="language-field" value="it">
+            <input type="hidden" name="found_latitude" id="latitude-field">
+            <input type="hidden" name="found_longitude" id="longitude-field">
+            <input type="hidden" name="google_maps_link" id="maps-link-field">
+            <input class="hidden-field" type="text" name="_gotcha" tabindex="-1" autocomplete="off">
+
+            <div class="field-grid">
+              <div class="field-group">
+                <label for="place-type" data-i18n="placeTypeLabel">Tipo di luogo</label>
+                <select id="place-type" name="found_place_type" required>
+                  <option value="" data-i18n="placeTypePlaceholder">Scegli una categoria</option>
+                  <option value="airport" data-i18n="placeAirport">Aeroporto</option>
+                  <option value="station" data-i18n="placeStation">Stazione</option>
+                  <option value="hotel" data-i18n="placeHotel">Hotel</option>
+                  <option value="transport" data-i18n="placeTransport">Treno, bus o taxi</option>
+                  <option value="city" data-i18n="placeCity">Città o strada</option>
+                  <option value="other" data-i18n="placeOther">Altro</option>
+                </select>
+                <p class="field-error" data-error-for="place-type"></p>
+              </div>
+
+              <div class="field-group">
+                <label for="found-location" data-i18n="locationLabel">Dove hai trovato la valigia?</label>
+                <input id="found-location" name="found_location" type="text" required autocomplete="street-address" data-i18n-placeholder="locationPlaceholder" placeholder="Aeroporto, stazione, hotel, città...">
+                <p class="field-error" data-error-for="found-location"></p>
+              </div>
+            </div>
+
+            <div class="field-group">
+              <label for="message" data-i18n="messageLabel">Messaggio</label>
+              <textarea id="message" name="message" rows="5" required data-i18n-placeholder="messagePlaceholder" placeholder="Scrivi un messaggio al proprietario..."></textarea>
+              <p class="field-error" data-error-for="message"></p>
+            </div>
+
+            <div class="field-grid">
+              <div class="field-group">
+                <label for="finder-name" data-i18n="finderNameLabel">Nome di chi ha trovato la valigia</label>
+                <input id="finder-name" name="finder_name" type="text" required autocomplete="off" data-i18n-placeholder="finderNamePlaceholder" placeholder="Il tuo nome">
+                <p class="field-error" data-error-for="finder-name"></p>
+              </div>
+
+              <div class="field-group">
+                <label for="contact-method" data-i18n="contactMethodLabel">Come preferisci essere ricontattato?</label>
+                <select id="contact-method" name="finder_contact_method" required>
+                  <option value="" data-i18n="contactMethodPlaceholder">Scegli un metodo</option>
+                  <option value="email" data-i18n="contactEmail">Email</option>
+                  <option value="phone" data-i18n="contactPhone">Telefono</option>
+                  <option value="whatsapp" data-i18n="contactWhatsapp">WhatsApp</option>
+                </select>
+                <p class="field-error" data-error-for="contact-method"></p>
+              </div>
+            </div>
+
+            <div class="field-group">
+                <label for="finder-contact" data-i18n="finderContactLabel">Contatto di chi ha trovato la valigia</label>
+                <input id="finder-contact" name="finder_contact" type="text" required autocomplete="off" data-i18n-placeholder="finderContactPlaceholder" placeholder="La tua email o il tuo telefono">
+                <p class="field-hint" data-i18n="finderContactHint">Questo campo riguarda solo la persona che ha trovato la valigia.</p>
+                <p class="field-error" data-error-for="finder-contact"></p>
+            </div>
+
+            <div class="location-box">
+              <div>
+                <h3 data-i18n="shareLocationTitle">Condividi posizione del ritrovamento</h3>
+                <p data-i18n="shareLocationText">La posizione verrà condivisa soltanto se scegli di autorizzarla.</p>
+              </div>
+              <button class="secondary-button" type="button" id="location-button" data-i18n="shareLocationButton">CONDIVIDI POSIZIONE DEL RITROVAMENTO</button>
+              <p class="location-status" id="location-status" role="status" aria-live="polite"></p>
+              <p class="coordinates-preview is-hidden" id="coordinates-preview"></p>
+              <a class="maps-preview is-hidden" id="maps-preview" href="#" target="_blank" rel="noopener" data-i18n="openMaps">Apri posizione su Google Maps</a>
+            </div>
+
+            <label class="privacy-check">
+              <input type="checkbox" id="privacy-consent" name="privacy_consent" value="yes" required>
+              <span data-i18n="privacyConsent">Autorizzo l'invio delle informazioni inserite esclusivamente allo scopo di contattare il proprietario della valigia.</span>
+            </label>
+            <p class="field-error" data-error-for="privacy-consent"></p>
+
+            <div class="form-actions">
+              <button class="primary-button" type="submit" id="submit-button" data-i18n="submitButton">INVIA AL PROPRIETARIO</button>
+              <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="success-section is-hidden" id="success-screen" aria-live="polite">
+        <div class="success-card">
+          <div class="success-symbol" aria-hidden="true">✓</div>
+          <p class="eyebrow" data-i18n="secureFormLabel">MESSAGGIO PROTETTO</p>
+          <h2 data-i18n="successTitle">MESSAGGIO INVIATO</h2>
+          <p data-i18n="successText">Grazie per il tuo aiuto. La tua segnalazione è stata inviata al proprietario della valigia.</p>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p data-i18n="footerText">Questa pagina scoraggia l'indicizzazione, ma chi possiede l'URL può comunque visitarla.</p>
+    </footer>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/app.js"></script>
+  </body>
+</html>
