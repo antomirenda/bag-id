@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="description" content="Pannello privato per vedere le segnalazioni della valigia.">
+    <meta name="theme-color" content="#111111">
+    <title>Bag ID | Segnalazioni</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+  </head>
+  <body data-page="admin">
+    <header class="topbar admin-topbar" aria-label="Navigazione">
+      <a class="brand" href="index.html" aria-label="Bag ID">
+        <span class="suitcase-mark suitcase-mark-small" aria-hidden="true"></span>
+        <span>Bag ID</span>
+      </a>
+      <a class="secondary-button compact-button" href="tag.html">PORTANOME</a>
+    </header>
+
+    <main class="admin-page">
+      <section class="admin-hero" aria-labelledby="admin-title">
+        <p class="eyebrow">PANNELLO PERSONALE</p>
+        <h1 id="admin-title">SEGNALAZIONI VALIGIA</h1>
+      </section>
+
+      <section class="admin-card" aria-labelledby="login-title">
+        <form class="admin-login" id="admin-login">
+          <div>
+            <label id="login-title" for="admin-code">Codice privato</label>
+            <input id="admin-code" name="admin_code" type="password" required autocomplete="current-password" placeholder="Inserisci il codice">
+          </div>
+          <button class="primary-button compact-button" type="submit">APRI</button>
+        </form>
+        <p class="form-status" id="admin-status" role="status" aria-live="polite"></p>
+      </section>
+
+      <section class="admin-dashboard is-hidden" id="admin-dashboard" aria-label="Archivio segnalazioni">
+        <div class="admin-toolbar">
+          <div class="admin-stat">
+            <span id="total-count">0</span>
+            <strong>Totali</strong>
+          </div>
+          <div class="admin-stat">
+            <span id="new-count">0</span>
+            <strong>Nuove</strong>
+          </div>
+          <div class="admin-stat">
+            <span id="resolved-count">0</span>
+            <strong>Risolte</strong>
+          </div>
+          <button class="secondary-button compact-button" id="refresh-button" type="button">AGGIORNA</button>
+        </div>
+
+        <div class="report-list" id="report-list"></div>
+      </section>
+    </main>
+
+    <script src="assets/js/config.js"></script>
+    <script src="assets/js/admin.js"></script>
+  </body>
+</html>
