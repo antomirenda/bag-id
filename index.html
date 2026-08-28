@@ -8,6 +8,7 @@
     <meta name="theme-color" content="#111111">
     <title>Bag ID | Contatta il proprietario</title>
     <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
     <link rel="stylesheet" href="assets/css/style.css">
   </head>
   <body data-page="home">
@@ -61,6 +62,8 @@
             <input type="hidden" name="found_latitude" id="latitude-field">
             <input type="hidden" name="found_longitude" id="longitude-field">
             <input type="hidden" name="google_maps_link" id="maps-link-field">
+            <input type="hidden" name="bot_a" id="bot-a-field">
+            <input type="hidden" name="bot_b" id="bot-b-field">
             <input class="hidden-field" type="text" name="_gotcha" tabindex="-1" autocomplete="off">
 
             <div class="field-grid">
@@ -80,7 +83,9 @@
 
               <div class="field-group">
                 <label for="found-location" data-i18n="locationLabel">Dove hai trovato la valigia?</label>
-                <input id="found-location" name="found_location" type="text" required autocomplete="street-address" data-i18n-placeholder="locationPlaceholder" placeholder="Aeroporto, stazione, hotel, città...">
+                <input id="found-location" name="found_location" type="text" required autocomplete="street-address" data-i18n-placeholder="locationPlaceholder" placeholder="Aeroporto, stazione, hotel, città..." aria-autocomplete="list" aria-expanded="false" aria-controls="address-suggestions">
+                <div class="address-suggestions is-hidden" id="address-suggestions" role="listbox" aria-label="Suggerimenti luogo"></div>
+                <p class="field-hint" id="address-search-status" data-i18n="addressSearchHint">Inizia a scrivere e seleziona il luogo giusto se compare.</p>
                 <p class="field-error" data-error-for="found-location"></p>
               </div>
             </div>
@@ -126,6 +131,9 @@
               <p class="location-status" id="location-status" role="status" aria-live="polite"></p>
               <p class="coordinates-preview is-hidden" id="coordinates-preview"></p>
               <a class="maps-preview is-hidden" id="maps-preview" href="#" target="_blank" rel="noopener" data-i18n="openMaps">Apri posizione su Google Maps</a>
+              <div class="found-map is-hidden" id="found-map" aria-label="Mappa del luogo selezionato">
+                <iframe id="found-map-frame" title="Mappa del luogo selezionato" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+              </div>
             </div>
 
             <label class="privacy-check">
@@ -133,6 +141,16 @@
               <span data-i18n="privacyConsent">Autorizzo l'invio delle informazioni inserite esclusivamente allo scopo di contattare il proprietario della valigia.</span>
             </label>
             <p class="field-error" data-error-for="privacy-consent"></p>
+
+            <div class="field-group anti-bot-box">
+              <label for="bot-answer">
+                <span data-i18n="antiBotLabel">Controllo anti-bot</span>
+                <strong id="bot-question">0 + 0</strong>
+              </label>
+              <input id="bot-answer" name="bot_answer" type="text" required inputmode="numeric" autocomplete="off" data-i18n-placeholder="antiBotPlaceholder" placeholder="Risultato">
+              <p class="field-hint" data-i18n="antiBotHint">Serve solo a bloccare invii automatici.</p>
+              <p class="field-error" data-error-for="bot-answer"></p>
+            </div>
 
             <div class="form-actions">
               <button class="primary-button" type="submit" id="submit-button" data-i18n="submitButton">INVIA AL PROPRIETARIO</button>
