@@ -439,6 +439,71 @@ textarea::placeholder {
   color: var(--muted);
 }
 
+.address-suggestions {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.address-suggestions button {
+  width: 100%;
+  border: 1px solid rgba(29, 29, 31, 0.1);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--ink);
+  cursor: pointer;
+  padding: 12px 14px;
+  text-align: left;
+}
+
+.address-suggestions button:hover,
+.address-suggestions button:focus-visible {
+  border-color: rgba(0, 113, 227, 0.38);
+  background: #f3f8ff;
+  outline: none;
+}
+
+.address-suggestions strong,
+.address-suggestions span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+
+.address-suggestions strong {
+  font-size: 0.95rem;
+}
+
+.address-suggestions span {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.anti-bot-box {
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: var(--radius);
+  background: #fbfbfd;
+  padding: 16px;
+}
+
+.anti-bot-box label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.anti-bot-box strong {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  padding: 0 12px;
+  font-size: 0.9rem;
+}
+
 .field-error,
 .is-error {
   color: var(--error);
@@ -471,6 +536,30 @@ textarea::placeholder {
   grid-column: 1 / -1;
   color: var(--ink);
   font-weight: 750;
+}
+
+.found-map,
+.report-location-panel {
+  overflow: hidden;
+  border: 1px solid rgba(29, 29, 31, 0.08);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.found-map {
+  grid-column: 1 / -1;
+  min-height: 260px;
+}
+
+.found-map iframe,
+.report-location-panel iframe {
+  display: block;
+  width: 100%;
+  border: 0;
+}
+
+.found-map iframe {
+  min-height: 260px;
 }
 
 .maps-preview::after {
@@ -825,10 +914,20 @@ body[data-page="admin"] {
 
 .admin-toolbar {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
   gap: 12px;
   align-items: center;
   padding: 16px;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.live-refresh {
+  margin: 0 4px 2px;
+  text-align: right;
 }
 
 .admin-stat {
@@ -916,10 +1015,58 @@ body[data-page="admin"] {
   background: #1f7a4d;
 }
 
-.report-message {
+.report-message-box {
   margin: 18px 0;
-  color: #2a2a2a;
-  font-size: 1.05rem;
+  border: 1px solid rgba(0, 113, 227, 0.18);
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, #ffffff 0%, #f3f8ff 100%);
+  padding: clamp(16px, 3vw, 22px);
+}
+
+.report-message-box span {
+  display: block;
+  margin-bottom: 8px;
+  color: #0071e3;
+  font-size: 0.76rem;
+  font-weight: 880;
+  letter-spacing: 0;
+}
+
+.report-message-box p {
+  margin: 0;
+  color: #1d1d1f;
+  font-size: clamp(1.08rem, 3vw, 1.35rem);
+  font-weight: 760;
+  line-height: 1.42;
+  overflow-wrap: anywhere;
+}
+
+.report-location-panel {
+  margin: 18px 0;
+}
+
+.report-location-copy {
+  padding: 16px 18px;
+}
+
+.report-location-copy span {
+  display: block;
+  color: #0071e3;
+  font-size: 0.76rem;
+  font-weight: 880;
+}
+
+.report-location-copy strong {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.02rem;
+  line-height: 1.28;
+  overflow-wrap: anywhere;
+}
+
+.report-location-panel iframe {
+  min-height: 320px;
+  border-top: 1px solid rgba(29, 29, 31, 0.08);
 }
 
 .report-details {
@@ -1018,6 +1165,14 @@ body[data-page="admin"] {
   .admin-toolbar,
   .report-details {
     grid-template-columns: 1fr;
+  }
+
+  .admin-actions {
+    display: grid;
+  }
+
+  .live-refresh {
+    text-align: left;
   }
 
   .report-head,
