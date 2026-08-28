@@ -11,7 +11,7 @@ Il file `assets/js/config.js` contiene solo dati pubblici:
 ```js
 const CONFIG = {
   bagId: "AM-7K42",
-  siteUrl: "INSERIRE_URL_FINALE",
+  siteUrl: "https://antomirenda.github.io/bag-id/bag/?id=AM-7K42",
   formEndpoint: "INSERIRE_ENDPOINT_FORMSPREE",
   defaultLanguage: "it"
 };
@@ -68,30 +68,24 @@ Carica tutti i file e le cartelle di questo progetto nel repository, mantenendo 
 
 ## 4. Ottieni l'URL finale
 
-Dopo qualche minuto GitHub mostra l'URL pubblico del sito. Se il repository si chiama `bag-id`, l'URL avrà una forma simile a:
+Dopo qualche minuto GitHub mostra l'URL pubblico del sito:
 
 ```text
-https://NOME-UTENTE.github.io/bag-id/
+https://antomirenda.github.io/bag-id/
 ```
 
 Per il QR usa l'URL con percorso dedicato e identificativo in query string:
 
 ```text
-https://NOME-UTENTE.github.io/bag-id/bag/?id=AM-7K42
+https://antomirenda.github.io/bag-id/bag/?id=AM-7K42
 ```
 
 ## 5. Modifica `siteUrl`
 
-Apri `assets/js/config.js` e sostituisci:
+`assets/js/config.js` è già impostato con:
 
 ```js
-siteUrl: "INSERIRE_URL_FINALE"
-```
-
-con l'URL finale completo:
-
-```js
-siteUrl: "https://NOME-UTENTE.github.io/bag-id/bag/?id=AM-7K42"
+siteUrl: "https://antomirenda.github.io/bag-id/bag/?id=AM-7K42"
 ```
 
 Il QR in `tag.html` viene generato da questo valore.
@@ -158,20 +152,20 @@ La posizione riguarda esclusivamente chi trova la valigia e decide di condivider
 Apri:
 
 ```text
-https://NOME-UTENTE.github.io/bag-id/tag.html
+https://antomirenda.github.io/bag-id/tag.html
 ```
 
 La pagina mostra fronte e retro della targhetta. Il fronte contiene il QR generato da `CONFIG.siteUrl`, senza stampare il Bag ID come testo.
 
 ## 12. Verifica il QR
 
-1. Prima di stampare, assicurati che `siteUrl` non sia più `INSERIRE_URL_FINALE`.
+1. Prima di stampare, assicurati che `siteUrl` punti alla pagina pubblica corretta.
 2. Apri `tag.html`.
 3. Inquadra il QR con un telefono.
 4. Verifica che apra l'URL:
 
 ```text
-https://NOME-UTENTE.github.io/bag-id/bag/?id=AM-7K42
+https://antomirenda.github.io/bag-id/bag/?id=AM-7K42
 ```
 
 ## 13. Stampa il portanome
