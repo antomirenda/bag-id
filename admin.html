@@ -54,11 +54,27 @@
           <button class="secondary-button compact-button" id="refresh-button" type="button">AGGIORNA</button>
           <div class="admin-actions">
             <button class="secondary-button compact-button" id="enable-notifications-button" type="button">ATTIVA NOTIFICHE</button>
+            <button class="secondary-button compact-button" id="logout-button" type="button">ESCI</button>
           </div>
         </div>
         <p class="muted-line live-refresh" id="live-refresh-status">Aggiornamento automatico ogni 30 secondi.</p>
 
         <div class="report-list" id="report-list"></div>
+
+        <section class="scan-panel" aria-labelledby="scan-title">
+          <div class="scan-heading">
+            <div>
+              <p class="eyebrow">CONTROLLO QR</p>
+              <h2 id="scan-title">SCANSIONI QR</h2>
+            </div>
+            <div class="admin-stat admin-stat-flat">
+              <span id="scan-count">0</span>
+              <strong>Ultime</strong>
+            </div>
+          </div>
+          <p class="muted-line">Mostra aperture del QR. Non identifica nome e cognome: indica dispositivo, ora e area approssimativa quando disponibile.</p>
+          <div class="scan-list" id="scan-list"></div>
+        </section>
       </section>
     </main>
 
