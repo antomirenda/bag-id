@@ -256,6 +256,41 @@
     return `https://www.google.com/maps?q=${latitude},${longitude}&z=17&output=embed`;
   }
 
+  function shouldTrackQrScan() {
+    return window.location.pathname.includes("/bag/");
+  }
+
+  function scanEndpoint() {
+    if (config.scanEndpoint) {
+      return config.scanEndpoint;
+    }
+
+    return String(config.formEndpoint || "").replace(/\/api\/reports\/?$/, "/api/scans");
+  }
+
+  function trackQrScan() {
+    const endpoint = scanEndpoint();
+
+    if (!shouldTrackQrScan() || isPlaceholder(endpoint)) {
+      return;
+    }
+
+    const payload = new URLSearchParams({
+      bag_id: bagId,
+      page_url: isPlaceholder(config.siteUrl) ? window.location.href : config.siteUrl,
+      language: currentLanguage,
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || ""
+    });
+
+    fetch(endpoint, {
+      method: "POST",
+      body: payload,
+      keepalive: true
+    }).catch(function () {
+      // La scansione non deve mai bloccare chi vuole aiutare.
+    });
+  }
+
   function clearFoundCoordinates() {
     if (fields.latitude) {
       fields.latitude.value = "";
@@ -636,4 +671,5 @@
   setText("[data-bag-id]", bagId);
   setLanguage(currentLanguage);
   setBotChallenge();
+  trackQrScan();
 }());
