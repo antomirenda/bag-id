@@ -7,8 +7,7 @@ Sito statico per GitHub Pages collegato a un piccolo backend con database. Chi t
 - Pagina pubblica del QR: `https://antomirenda.github.io/bag-id/bag/?id=AM-7K42`
 - Portanome stampabile: `https://antomirenda.github.io/bag-id/tag.html`
 - Pannello segnalazioni: `https://antomirenda.github.io/bag-id/admin.html`
-- Backend segnalazioni: `https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/reports`
-- Backend notifiche: `https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/push`
+- Servizio privato segnalazioni/notifiche: configurato in `assets/js/config.js`
 
 ## Privacy
 
@@ -72,8 +71,9 @@ Il file `assets/js/config.js` contiene solo valori pubblici:
 const CONFIG = {
   bagId: "AM-7K42",
   siteUrl: "https://antomirenda.github.io/bag-id/bag/?id=AM-7K42",
-  formEndpoint: "https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/reports",
-  pushEndpoint: "https://bag-id-recovery.pro-loco-san-2036.chatgpt.site/api/push",
+  formEndpoint: "PRIVATE_REPORTS_ENDPOINT",
+  pushEndpoint: "PRIVATE_PUSH_ENDPOINT",
+  scanEndpoint: "PRIVATE_SCAN_ENDPOINT",
   pushPublicKey: "PUBLIC_WEB_PUSH_KEY",
   defaultLanguage: "it"
 };
@@ -94,9 +94,19 @@ Da `admin.html` si possono vedere:
 
 Il pannello richiede il codice privato impostato nel backend. Non pubblicare questo codice nel repository.
 
+Il primo accesso crea una sessione privata sul dispositivo, così non è necessario reinserire il codice a ogni apertura. Il pulsante `ESCI` elimina l'accesso salvato da quel dispositivo.
+
+Ogni messaggio ricevuto può essere eliminato definitivamente dal pannello con `ELIMINA CONTATTO`.
+
 Il pannello può essere installato come app sul telefono. Dopo averlo aperto con il codice privato, il pulsante `ATTIVA NOTIFICHE` registra solo quel dispositivo. Le notifiche sono generiche e non mostrano il messaggio o il contatto sulla schermata bloccata.
 
 Il pannello si aggiorna automaticamente ogni 30 secondi mentre è aperto.
+
+## Scansioni QR
+
+Quando qualcuno apre il link del QR viene registrata una scansione tecnica minimale: data, dispositivo/browser, lingua, fuso orario e area approssimativa quando disponibile dal provider. Non identifica nome e cognome della persona.
+
+Le scansioni vengono mostrate nel pannello admin e possono generare una notifica push sul dispositivo autorizzato. Le scansioni ripetute dallo stesso visitatore in pochi minuti vengono raggruppate per evitare notifiche inutili.
 
 ## Stampa del portanome
 
