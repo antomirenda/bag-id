@@ -10,11 +10,11 @@ self.addEventListener("push", function (event) {
   const adminUrl = new URL("admin.html", self.registration.scope).href;
 
   event.waitUntil(
-    self.registration.showNotification("Nuova segnalazione valigia", {
-      body: "Apri il pannello Bag ID per leggere il messaggio.",
+    self.registration.showNotification("Nuova attività Bag ID", {
+      body: "Apri il pannello Bag ID per vedere segnalazioni e scansioni QR.",
       badge: "assets/icons/suitcase.svg",
       icon: "assets/icons/suitcase.svg",
-      tag: "bag-id-report",
+      tag: "bag-id-activity",
       renotify: true,
       data: {
         url: adminUrl
