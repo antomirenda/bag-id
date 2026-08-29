@@ -11,11 +11,17 @@
   const totalCount = document.querySelector("#total-count");
   const newCount = document.querySelector("#new-count");
   const resolvedCount = document.querySelector("#resolved-count");
+  const scanCount = document.querySelector("#scan-count");
+  const scanList = document.querySelector("#scan-list");
   const enableNotificationsButton = document.querySelector("#enable-notifications-button");
+  const logoutButton = document.querySelector("#logout-button");
   const liveRefreshStatus = document.querySelector("#live-refresh-status");
 
+  const adminTokenStorageKey = "bag-id-admin-token-v1";
   let adminCode = "";
+  let adminToken = "";
   let reports = [];
+  let scans = [];
   let refreshTimer = 0;
   const refreshIntervalMs = 30000;
 
@@ -26,6 +32,30 @@
   function setStatus(message, type) {
     statusNode.textContent = message;
     statusNode.className = type ? `form-status ${type}` : "form-status";
+  }
+
+  function readStoredAdminToken() {
+    try {
+      return window.localStorage.getItem(adminTokenStorageKey) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function storeAdminToken(token) {
+    try {
+      window.localStorage.setItem(adminTokenStorageKey, token);
+    } catch {
+      // Se il browser blocca il salvataggio, il pannello resta comunque utilizzabile.
+    }
+  }
+
+  function clearStoredAdminToken() {
+    try {
+      window.localStorage.removeItem(adminTokenStorageKey);
+    } catch {
+      // Nessuna azione necessaria.
+    }
   }
 
   function formatDate(value) {
@@ -103,9 +133,12 @@
       throw new Error("Il servizio di segnalazione non è ancora collegato.");
     }
 
+    const auth = adminToken
+      ? { admin_token: adminToken }
+      : { admin_code: adminCode };
     const payload = new URLSearchParams({
       action,
-      admin_code: adminCode,
+      ...auth,
       ...(extra || {})
     });
 
@@ -162,9 +195,12 @@
       throw new Error("Le notifiche non sono ancora collegate.");
     }
 
+    const auth = adminToken
+      ? { admin_token: adminToken }
+      : { admin_code: adminCode };
     const payload = new URLSearchParams({
       action,
-      admin_code: adminCode,
+      ...auth,
       ...(extra || {})
     });
 
@@ -184,7 +220,7 @@
   }
 
   async function enablePushNotifications() {
-    if (!adminCode) {
+    if (!adminCode && !adminToken) {
       setStatus("Apri prima il pannello con il codice privato.", "is-error");
       return;
     }
@@ -223,7 +259,7 @@
       });
 
       await registration.showNotification("Notifiche Bag ID attive", {
-        body: "Riceverai un avviso quando arriva una nuova segnalazione.",
+        body: "Riceverai un avviso quando arriva una segnalazione o una scansione QR.",
         tag: "bag-id-ready",
         data: {
           url: new URL("admin.html", window.location.href).href
@@ -246,6 +282,9 @@
     resolvedCount.textContent = String(reports.filter(function (report) {
       return report.status === "resolved";
     }).length);
+    if (scanCount) {
+      scanCount.textContent = String(scans.length);
+    }
   }
 
   function renderReports() {
@@ -307,6 +346,7 @@
           </dl>
           <div class="report-actions">
             ${maps}
+            <button class="danger-button compact-button" type="button" data-delete-report="${escapeHtml(report.id)}">ELIMINA CONTATTO</button>
             <label>
               Stato
               <select data-status-select="${escapeHtml(report.id)}">
@@ -316,6 +356,52 @@
               </select>
             </label>
           </div>
+        </article>
+      `;
+    }).join("");
+  }
+
+  function scanPlace(scan) {
+    const parts = [scan.city, scan.region, scan.country].filter(Boolean);
+    return parts.length ? parts.join(", ") : "Area non disponibile";
+  }
+
+  function renderScans() {
+    if (!scanList) {
+      return;
+    }
+
+    if (!scans.length) {
+      scanList.innerHTML = '<article class="empty-state compact-empty">Nessuna scansione registrata.</article>';
+      return;
+    }
+
+    scanList.innerHTML = scans.map(function (scan) {
+      const repeatText = Number(scan.repeatCount) > 1
+        ? ` · ${Number(scan.repeatCount)} aperture ravvicinate`
+        : "";
+
+      return `
+        <article class="scan-card" data-scan-id="${escapeHtml(scan.id)}">
+          <div>
+            <h3>${escapeHtml(scan.deviceLabel || "Dispositivo")}</h3>
+            <time>${escapeHtml(formatDate(scan.updatedAt || scan.createdAt))}${escapeHtml(repeatText)}</time>
+          </div>
+          <dl class="scan-details">
+            <div>
+              <dt>Area</dt>
+              <dd>${escapeHtml(scanPlace(scan))}</dd>
+            </div>
+            <div>
+              <dt>Lingua</dt>
+              <dd>${escapeHtml((scan.language || "n/d").toUpperCase())}</dd>
+            </div>
+            <div>
+              <dt>Fuso orario</dt>
+              <dd>${escapeHtml(scan.timezone || "Non disponibile")}</dd>
+            </div>
+          </dl>
+          <button class="danger-button compact-button" type="button" data-delete-scan="${escapeHtml(scan.id)}">ELIMINA</button>
         </article>
       `;
     }).join("");
@@ -346,8 +432,10 @@
     try {
       const data = await adminRequest("list");
       reports = Array.isArray(data.reports) ? data.reports : [];
+      scans = Array.isArray(data.scans) ? data.scans : [];
       dashboard.classList.remove("is-hidden");
       renderReports();
+      renderScans();
       startAutoRefresh();
 
       if (!quiet) {
@@ -359,10 +447,22 @@
           second: "2-digit"
         }).format(new Date())}.`;
       }
+
+      return true;
     } catch (error) {
+      if (adminToken) {
+        clearStoredAdminToken();
+        adminToken = "";
+        dashboard.classList.add("is-hidden");
+        setStatus("Accesso salvato scaduto. Inserisci di nuovo il codice privato.", "is-error");
+        return false;
+      }
+
       if (!quiet) {
         setStatus(error instanceof Error ? error.message : "Errore imprevisto.", "is-error");
       }
+
+      return false;
     } finally {
       refreshButton.disabled = false;
     }
@@ -377,20 +477,90 @@
     setStatus("Stato aggiornato.", "is-success");
   }
 
-  loginForm.addEventListener("submit", function (event) {
+  async function deleteReport(id) {
+    await adminRequest("delete-report", { id });
+    reports = reports.filter(function (report) {
+      return report.id !== id;
+    });
+    renderReports();
+    setStatus("Contatto eliminato definitivamente.", "is-success");
+  }
+
+  async function deleteScan(id) {
+    await adminRequest("delete-scan", { id });
+    scans = scans.filter(function (scan) {
+      return scan.id !== id;
+    });
+    updateStats();
+    renderScans();
+    setStatus("Scansione eliminata definitivamente.", "is-success");
+  }
+
+  async function createSavedSession(code) {
+    adminCode = code;
+    adminToken = "";
+
+    const data = await adminRequest("create-session");
+    if (data.token) {
+      adminToken = String(data.token);
+      storeAdminToken(adminToken);
+      adminCode = "";
+      codeInput.value = "";
+    }
+  }
+
+  async function logout() {
+    if (adminToken) {
+      await adminRequest("revoke-session").catch(function () {
+        return undefined;
+      });
+    }
+
+    adminCode = "";
+    adminToken = "";
+    reports = [];
+    scans = [];
+    clearStoredAdminToken();
+    dashboard.classList.add("is-hidden");
+    renderReports();
+    renderScans();
+    setStatus("Accesso rimosso da questo dispositivo.", "is-success");
+  }
+
+  loginForm.addEventListener("submit", async function (event) {
     event.preventDefault();
-    adminCode = codeInput.value.trim();
-    if (!adminCode) {
+    const code = codeInput.value.trim();
+    if (!code) {
       setStatus("Inserisci il codice privato.", "is-error");
       return;
     }
+
+    setStatus("Accesso in corso...", "");
+
+    try {
+      await createSavedSession(code);
+      await loadReports();
+      setStatus("Accesso salvato su questo dispositivo.", "is-success");
+    } catch (error) {
+      adminCode = "";
+      adminToken = "";
+      clearStoredAdminToken();
+      setStatus(error instanceof Error ? error.message : "Codice privato non corretto.", "is-error");
+    }
+  });
+
+  refreshButton.addEventListener("click", function () {
     loadReports();
   });
 
-  refreshButton.addEventListener("click", loadReports);
-
   if (enableNotificationsButton) {
     enableNotificationsButton.addEventListener("click", enablePushNotifications);
+  }
+
+  if (logoutButton) {
+    logoutButton.addEventListener("click", function () {
+      logout();
+    });
   }
 
   reportList.addEventListener("change", function (event) {
@@ -403,4 +573,50 @@
       setStatus("Non riesco ad aggiornare lo stato.", "is-error");
     });
   });
+
+  reportList.addEventListener("click", function (event) {
+    const button = event.target && event.target.closest("[data-delete-report]");
+    if (!button) {
+      return;
+    }
+
+    const id = button.getAttribute("data-delete-report");
+    const confirmed = window.confirm("Eliminare definitivamente questo contatto e il suo messaggio?");
+    if (!confirmed) {
+      return;
+    }
+
+    deleteReport(id).catch(function () {
+      setStatus("Non riesco a eliminare questo contatto.", "is-error");
+    });
+  });
+
+  if (scanList) {
+    scanList.addEventListener("click", function (event) {
+      const button = event.target && event.target.closest("[data-delete-scan]");
+      if (!button) {
+        return;
+      }
+
+      const id = button.getAttribute("data-delete-scan");
+      const confirmed = window.confirm("Eliminare definitivamente questa scansione?");
+      if (!confirmed) {
+        return;
+      }
+
+      deleteScan(id).catch(function () {
+        setStatus("Non riesco a eliminare questa scansione.", "is-error");
+      });
+    });
+  }
+
+  adminToken = readStoredAdminToken();
+  if (adminToken) {
+    setStatus("Ripristino accesso salvato...", "");
+    loadReports({ quiet: true }).then(function (isReady) {
+      if (isReady) {
+        setStatus("Accesso già attivo su questo dispositivo.", "is-success");
+      }
+    });
+  }
 }());
